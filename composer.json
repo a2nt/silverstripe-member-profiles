@@ -1,14 +1,14 @@
 {
-    "name": "a2nt/silverstripe-members",
+    "name": "a2nt/silverstripe-member-profiles",
     "description": "SilverStripe extendable profile areas. Provides registration page and extendable profile page area.",
     "type": "silverstripe-module",
     "license": "BSD-3-Clause",
-    "keywords": ["silverstripe", "members", "registration", "profile"],
+    "keywords": ["silverstripe", "members", "registration", "profile", "frontend"],
     "require": {
         "silverstripe/framework": "~3.1"
     },
     "extra": {
-        "installer-name": "members"
+        "installer-name": "member-profiles"
     },
     "authors": [{
         "name": "Anton Fedianin",
