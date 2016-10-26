@@ -31,6 +31,9 @@ class MyProfileArea extends MemberProfilePage_Controller {
 }
 ```
 
+Profile information will use /profile URL, sub-controllers will use sub-URLs of this page for example:
+/profile/myprofilearea
+
 New area will be automatically added to frontend member profile area navigation menu, but you can add hide ancestor to keep it hidden:
 ```php
 class MyProfileArea extends MemberProfilePage_Controller {
