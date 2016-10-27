@@ -119,7 +119,7 @@ class MemberProfilePage_Controller extends Page_Controller
 
         $lang_var = ($class === 'MemberProfilePage_Controller')
             ? 'MemberProfilePage.Title'
-            : 'MemberProfilePage.Title'.str_replace('_Controller', '', $class);
+            : str_replace('_Controller', '', $class).'.Title';
 
         return _t(
             $lang_var,
