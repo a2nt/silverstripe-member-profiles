@@ -56,7 +56,7 @@ class MemberRegistrationForm extends Form
         $member = Member::create();
         $form->saveInto($member);
         $member->write();
-        $this->extend('onRegister', $member);
+        $this->extend('onRegister', $data, $form, $member);
 
         $result = $member->canLogIn();
         if ($result->valid()) {
