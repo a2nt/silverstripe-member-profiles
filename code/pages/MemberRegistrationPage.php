@@ -44,6 +44,7 @@ class MemberRegistrationPage extends Page
      * Returns the link or the URLSegment to the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     * @return string Page Link
      */
     public static function find_link($urlSegment = false)
     {
@@ -56,6 +57,7 @@ class MemberRegistrationPage extends Page
      * Returns the title of the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     * @return string page Title
      */
     public static function find_title()
     {
@@ -66,8 +68,9 @@ class MemberRegistrationPage extends Page
 
     protected static function get_if_account_page_exists()
     {
-        if ($page = self::get()) {
-            return $page->First();
+        $page = self::get();
+        if ($page) {
+            return $page->first();
         }
         user_error('No Member Registration Page was found. Please create one in the CMS!', E_USER_ERROR);
     }
@@ -89,7 +92,8 @@ class MemberRegistrationPage_Controller extends Page_Controller
 
     public function init()
     {
-        if ($backurl = $this->getRequest()->getVar('BackURL')) {
+        $backurl = $this->getRequest()->getVar('BackURL');
+        if ($backurl) {
             Session::set('BackURL', $backurl);
         }
         parent::init();

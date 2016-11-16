@@ -17,7 +17,7 @@ class MemberRegistrationForm extends Form
     {
         if (!$fields) {
             $restrictfields = [
-                Member::get_unique_identifier_field(),'FirstName','Surname',
+                Member::config()->unique_identifier_field,'FirstName','Surname',
             ];
             $fields = singleton('Member')->scaffoldFormFields([
                 'restrictFields' => $restrictfields,
@@ -49,7 +49,8 @@ class MemberRegistrationForm extends Form
     {
 
         // log out existing user
-        if ($member = Member::currentUser()) {
+        $member = Member::currentUser();
+        if ($member) {
             $member->logOut();
         }
 
@@ -65,13 +66,15 @@ class MemberRegistrationForm extends Form
             return $this->controller->redirectBack();
         }
 
-        if ($back = Session::get('BackURL')) {
+        $back = Session::get('BackURL');
+        if ($back) {
             Session::clear('BackURL');
 
-            return $this->Controller()->redirect($back);
+            return Controller::curr()->redirect($back);
         }
 
-        if ($link = $member->getProfileLink()) {
+        $link = $member->getProfileLink();
+        if ($link) {
             return $this->controller->redirect($link);
         }
 

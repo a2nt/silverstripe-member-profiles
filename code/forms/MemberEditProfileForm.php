@@ -33,7 +33,8 @@ class MemberEditProfileForm extends Form
         );
         parent::__construct($controller, $name, $fields, $actions, $validator);
 
-        if ($passwordfield = $this->getChangePasswordField()) {
+        $passwordfield = $this->getChangePasswordField();
+        if ($passwordfield) {
             $fields->push($passwordfield);
         }
 
@@ -74,7 +75,7 @@ class MemberEditProfileForm extends Form
         foreach ($changedFields as $key => $field) {
             if (in_array($key, $notifyOnFields)) {
                 $body .= "<br/><strong>$key:</strong><br/>".
-                    "<strike style='color:red;'>".$field['before'].'</strike><br/>'.
+                    "<b style='color:red;'>".$field['before'].'</b><br/>'.
                     "<span style='color:green;'>".$field['after'].'</span><br/>';
                 $send = true;
             }
@@ -98,12 +99,8 @@ class MemberEditProfileForm extends Form
     protected function getChangePasswordField()
     {
         if ($this->member->ID != Member::currentUserID()) {
-            return;
+            return false;
         }
-        $backurl = Controller::join_links(
-            $this->controller->Link(),
-            'edit'
-        );
 
         return LiteralField::create(
             'ChangePasswordLink',

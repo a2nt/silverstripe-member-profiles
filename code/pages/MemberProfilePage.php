@@ -28,6 +28,7 @@ class MemberProfilePage extends Page
      * Returns the link or the URLSegment to the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     * @return string
      */
     public static function find_link($urlSegment = false)
     {
@@ -39,6 +40,7 @@ class MemberProfilePage extends Page
      * Returns the title of the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     * @return string
      */
     public static function find_title()
     {
@@ -49,8 +51,9 @@ class MemberProfilePage extends Page
 
     protected static function get_if_account_page_exists()
     {
-        if ($page = self::get()) {
-            return $page->First();
+        $page = self::get();
+        if ($page) {
+            return $page->first();
         }
         user_error('No Profile Page was found. Please create one in the CMS!', E_USER_ERROR);
     }
@@ -238,7 +241,7 @@ class MemberProfilePage_Controller extends Page_Controller
 
     public function hasProfileController($controller)
     {
-        $classes = $this->get_type_classes();
+        $classes = self::get_type_classes();
         if (is_array($classes)) {
             return in_array($controller, $classes);
         }
@@ -264,7 +267,8 @@ class MemberProfilePage_Controller extends Page_Controller
         foreach ($classes as $class) {
             $instance = singleton($class);
             // do any of the progeny want to hide an ancestor?
-            if ($ancestor_to_hide = $instance->stat('hide_ancestor')) {
+            $ancestor_to_hide = $instance->stat('hide_ancestor');
+            if ($ancestor_to_hide) {
                 // note for killing later
                 $kill_ancestors[] = $ancestor_to_hide;
             }
