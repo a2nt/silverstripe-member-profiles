@@ -228,7 +228,7 @@ class MemberProfilePage_Controller extends Page_Controller
         if ($this->hasProfileController($action)) {
             $request->shiftAllParams();
             $controller = Injector::inst()->create($action, $this->dataRecord);
-            //$this->pushCurrent();
+            $this->pushCurrent();
 
             return $controller->handleRequest($request, $this->model);
         }
