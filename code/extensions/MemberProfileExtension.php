@@ -11,6 +11,9 @@ class MemberProfileExtension extends DataExtension
 {
     public function getProfileLink($action = null)
     {
-        return MemberProfilePage::get()->first()->Link($action);
+        return Controller::join_links(
+            Config::inst()->get('ProfileController', 'url_segment'),
+            $action
+        );
     }
 }

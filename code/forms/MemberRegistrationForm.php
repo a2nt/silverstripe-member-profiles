@@ -16,11 +16,13 @@ class MemberRegistrationForm extends Form
     public function __construct($controller, $name = 'MemberRegistrationForm', $fields = null)
     {
         if (!$fields) {
-            $restrictfields = [
-                Member::config()->unique_identifier_field,'FirstName','Surname',
+            $restrictFields = [
+                Member::config()->unique_identifier_field,
+                'FirstName',
+                'Surname',
             ];
             $fields = singleton('Member')->scaffoldFormFields([
-                'restrictFields' => $restrictfields,
+                'restrictFields' => $restrictFields,
                 'fieldClasses' => [
                     'Email' => 'EmailField',
                 ],
@@ -32,7 +34,7 @@ class MemberRegistrationForm extends Form
             $register = FormAction::create('register', _t('MemberRegistrationForm.REGISTER', 'Register'))
         );
         $validator = MemberRegistration_Validator::create(
-            Member::get_unique_identifier_field(),
+            Member::config()->unique_identifier_field,
             'FirstName',
             'Surname'
         );

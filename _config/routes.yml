@@ -1,0 +1,7 @@
+---
+Name: member-profiles
+After: framework/routes#coreroutes
+---
+Director:
+  rules:
+    profile: 'ProfileController'

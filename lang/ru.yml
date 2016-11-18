@@ -1,0 +1,14 @@
+ru:
+  ProfileController:
+    TITLE: 'Профиль'
+    MUSTBELOGGEDIN: 'Вы должны войти в систему для доступа к вашему профилю'
+  ProfileMembership:
+    TITLE: 'Изменить Профиль'
+  MemberRegistrationPage:
+    DEFAULTTITLE: 'Регистрация'
+    DEFAULTCONTENT: '<p>Стадартное содержимое страницы регистрации. Вы можете изменить его в <a href="/admin/">Админке</a></p>'
+  MemberEditProfileForm:
+    UPDATED: 'Ваш профиль обновлён.'
+    UPDATEDMSGCONTENT: '{name} обновил свои данные на сайте. Текущие данные:<br/>'
+    CHANGEPASSWORD: 'Изменить Пароль'
+    REGISTER: 'Зарегистрироваться'

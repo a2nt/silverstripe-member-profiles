@@ -32,7 +32,7 @@ class MemberRegistrationPage extends Page
             $className = get_class($this);
             $page = new $className();
             $page->setField('Title', _t($className.'DEFAULTTITLE', 'Register'));
-            $page->setField('Content', _t($className.'DEFAULTCONTENT', '<p>Default page content. You can change it in the <a href="/admin/">CMS</a></p>'));
+            $page->setField('Content', _t($className.'DEFAULTCONTENT', '<p>Default registration page content. You can change it in the <a href="/admin/">CMS</a></p>'));
             $page->write();
             $page->publish('Stage', 'Live');
             $page->flushCache();
@@ -44,6 +44,7 @@ class MemberRegistrationPage extends Page
      * Returns the link or the URLSegment to the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     *
      * @return string Page Link
      */
     public static function find_link($urlSegment = false)
@@ -57,6 +58,7 @@ class MemberRegistrationPage extends Page
      * Returns the title of the account page on this site.
      *
      * @param bool $urlSegment Return the URLSegment only
+     *
      * @return string page Title
      */
     public static function find_title()
@@ -97,11 +99,6 @@ class MemberRegistrationPage_Controller extends Page_Controller
             Session::set('BackURL', $backurl);
         }
         parent::init();
-    }
-
-    public function Title()
-    {
-        return _t('MemberRegistrationPage.TITLE', 'Register');
     }
 
     public function Form()

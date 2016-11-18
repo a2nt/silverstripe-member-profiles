@@ -13,6 +13,7 @@
 			<% loop $ProfileMenu %>
 				<li class="$Status">
 					<a href="$Link" rel="nofollow">
+                        $Icon
 						$Title
 					</a>
 				</li>
