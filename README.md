@@ -51,6 +51,15 @@ class MyProfileArea extends ProfileController {
 }
 ```
 
+Requirements config example:
+```yml
+ProfileController:
+  requirements_css:
+    - site/css/ProfileController.css
+  requirements_javascript:
+    - site/css/ProfileController.js
+```
+
 ### Profile CRUD
 
 ```php

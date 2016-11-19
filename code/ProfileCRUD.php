@@ -1,15 +1,18 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: tony
- * Date: 11/18/16
- * Time: 1:07 PM
+ * Object management forms and
+ *
  */
 
 class ProfileCRUD extends ProfileController
 {
+    private static $hide_ancestor = true;
+
+    private static $managed_models = [
+    ];
+
     private static $allowed_actions = [
-        'new',
+        'newitem',
         'view',
         'edit',
         'delete',
@@ -18,11 +21,6 @@ class ProfileCRUD extends ProfileController
 
     private static $url_handlers = [
         '$ModelClass!/$Action!/$ID/$OtherID' => 'handleAction',
-    ];
-
-    private static $hide_ancestor = true;
-
-    private static $managed_models = [
     ];
 
     private $item = null;
@@ -34,34 +32,41 @@ class ProfileCRUD extends ProfileController
 
     public function setupVariables()
     {
-        //$this->request->setRouteParams($this->request->latestParams());
+        parent::setupVariables();
+        $this->extend('setupVariables');
 
         $modelClass = $this->request->param('ModelClass');
         $req = $this->request->requestVar('ModelClass');
         $modelClass = $req ? $req : $modelClass;
-
         if ($modelClass) {
             if (!in_array($modelClass, $this->stat('managed_models'))) {
-                return $this->httpError(404, 'Model ' . $class . ' isn\'t available.');
+                $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                return false;
             }
             $this->modelClass = $modelClass;
 
-            $ID = $this->request->param('ID');
-            $req = $this->request->requestVar('ModelClass');
-            $ID = $req ? $req : $ID;
-            if (is_numeric($ID)) {
-                $item = $modelClass::get()->byID($ID);
-                if (!$item) {
-                    return $this->httpError(404);
-                }
-                $this->setItem($item);
-            }
+            // allow new/$ID if you need to add object to a specific ID
+            $action = $this->request->param('Action');
+            switch ($action) {
+                case 'view':
+                case 'edit':
+                case 'delete':
+                    $ID = $this->request->param('ID');
+                    $req = $this->request->requestVar('ModelClass');
+                    $ID = $req ? $req : $ID;
 
-            return true;
+                    $item = $modelClass::get()->byID($ID);
+                    if (!$item) {
+                        $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                        return false;
+                    }
+                    $this->setItem($item);
+                break;
+            }
         }
 
 
-        return false;
+        return true;
     }
 
     public function getItem()
@@ -74,7 +79,7 @@ class ProfileCRUD extends ProfileController
         $this->item = $item;
     }
 
-    public function new()
+    public function newitem()
     {
         if (!Permission::check('CREATE_'.$this->modelClass)) {
             return Security::permissionFailure();
@@ -82,6 +87,7 @@ class ProfileCRUD extends ProfileController
 
         return $this->render();
     }
+
     public function view()
     {
         if (!Permission::check('VIEW_'.$this->modelClass)) {
@@ -197,19 +203,19 @@ class ProfileCRUD extends ProfileController
     {
         $new = false;
         $ID = isset($data['ID']) ? $data['ID'] : null;
-        $model = $this->modelClass;
+        $modelClass = $this->modelClass;
 
-        if (!Permission::check('CREATE_'.$class)) {
+        if (!Permission::check('CREATE_'.$modelClass)) {
             return Security::permissionFailure();
         }
 
         if ($ID) {
-            if (!$item = $model::get()->byID($ID)) {
+            if (!$item = $modelClass::get()->byID($ID)) {
                 return $this->httpError(404);
             }
             $new = true;
         } else {
-            $item = singleton($class);
+            $item = singleton($modelClass);
         }
 
         if (!$item->canEdit()) {
@@ -237,7 +243,7 @@ class ProfileCRUD extends ProfileController
         }
     }
 
-    public function doDelete(array $data)
+    public function doDelete()
     {
         $item = $this->getItem();
         if ($item->ID && $item->canEdit()) {

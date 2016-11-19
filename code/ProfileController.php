@@ -21,6 +21,9 @@ class ProfileController extends Controller
         'handleController' => true,
     ];
 
+    private static $requirements_css = [];
+    private static $requirements_javascript = [];
+
     protected $member = null;
     protected $response_controller = null;
     protected $profile_classes = null;
@@ -28,6 +31,7 @@ class ProfileController extends Controller
     public function init()
     {
         parent::init();
+
         if (!$this->member) {
             $currentUser = Member::currentUser();
             if (!$currentUser) {
@@ -39,6 +43,11 @@ class ProfileController extends Controller
                 $this->setMember($currentUser);
             }
         }
+
+        Requirements::combine_files(get_class($this).'.css', $this->stat('requirements_css'));
+        Requirements::combine_files(get_class($this).'.js', $this->stat('requirements_javascript'));
+
+        $this->extend('init');
     }
 
     public static function canView()
@@ -170,9 +179,6 @@ class ProfileController extends Controller
         return $tags;
     }
 
-    public function setupVariables()
-    {
-    }
     /**
      * Handles requests by Profile Controller.
      *
@@ -188,7 +194,6 @@ class ProfileController extends Controller
 
             // remove first 2 pieces of URL and process request
             $request->setURL(implode('/', array_slice(explode('/', $request->getURL()), 2)));
-            $controller->setRequest($request);
 
             return $controller->handleRequest($request, DataModel::inst());
         }
@@ -204,6 +209,25 @@ class ProfileController extends Controller
         $result = $this->handleAction($request, $action);
 
         return $result;
+    }
+
+    /**
+     * Let's you check params and the other variables
+     * for example ProfileCRUD checks managed_models and IDs being set
+     * if request has ModelClass param it shall be manageable
+     * if it's edit or view request item with specified ID shall exist
+     *
+     * @return boolean
+     */
+    public function setupVariables(){
+        return true;
+    }
+
+    protected function handleAction($request, $action) {
+        if($this->setupVariables()) {
+            return parent::handleAction($request, $action);
+        }
+        return $this->httpError(404,'Not available.');
     }
 
     /**
@@ -228,14 +252,14 @@ class ProfileController extends Controller
         }
 
         $kill_ancestors = [];
+        $config = Config::inst();
         // figure out if there are any classes we don't want to appear
         foreach ($classes as $class) {
-            $instance = singleton($class);
             // do any of the progeny want to hide an ancestor?
-            $ancestor_to_hide = $instance->stat('hide_ancestor');
+            $ancestor_to_hide = $config->get($class, 'hide_ancestor', Config::UNINHERITED);
             if ($ancestor_to_hide) {
                 // note for killing later
-                $kill_ancestors[] = $ancestor_to_hide;
+                $kill_ancestors[] = $class;
             }
         }
 
@@ -276,14 +300,14 @@ class ProfileController extends Controller
      *
      * @return Page_Controller
      */
-    protected function getResponseController()
+    public function getResponseController()
     {
         if ($this->response_controller) {
             return $this->response_controller;
         }
 
         // Use sitetree pages to render the page
-        $tmpPage = new Page();
+        $tmpPage = Page::create();
         $tmpPage->Title = $this->Title();
         // Disable ID-based caching  of the log-in page by making it a random number
         $tmpPage->ID = -1 * rand(1, 10000000);
@@ -313,11 +337,6 @@ class ProfileController extends Controller
             ]);
     }
 
-    protected function handleAction($request, $action)
-    {
-        $this->setupVariables();
-        return parent::handleAction($request, $action);
-    }
     /**
      * Render the current controller with the templates determined
      * by {@link getViewer()}.
@@ -335,5 +354,18 @@ class ProfileController extends Controller
                 $this->stat('template_main'),
                 'Page',
             ]);
+    }
+
+    /**
+     * Throws a HTTP error response encased in a {@link SS_HTTPResponse_Exception}, which is later caught in
+     * {@link RequestHandler::handleAction()} and returned to the user.
+     *
+     * @param int $errorCode
+     * @param string $errorMessage Plaintext error message
+     * @uses SS_HTTPResponse_Exception
+     */
+    public function httpError($errorCode, $errorMessage = null) {
+        $response = ErrorPage::response_for($errorCode);
+        return parent::httpError($errorCode, $response ? $response : $errorMessage);
     }
 }
