@@ -20,10 +20,14 @@ class ProfileCRUD extends ProfileController
     ];
 
     private static $url_handlers = [
+        '$ModelClass!/ItemForm' => 'ItemForm',
         '$ModelClass!/$Action!/$ID/$OtherID' => 'handleAction',
     ];
 
-    private $item = null;
+    /**
+     * @var DataObject
+     */
+    private $item;
 
     /**
      * @var String
@@ -38,6 +42,7 @@ class ProfileCRUD extends ProfileController
         $modelClass = $this->request->param('ModelClass');
         $req = $this->request->requestVar('ModelClass');
         $modelClass = $req ? $req : $modelClass;
+
         if ($modelClass) {
             if (!in_array($modelClass, $this->stat('managed_models'))) {
                 $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
@@ -161,6 +166,7 @@ class ProfileCRUD extends ProfileController
         )
             ->loadDataFrom($item);
 
+
         if ($this->item) {
             $actions->push(FormAction::create(
                 'doDelete',
@@ -197,6 +203,11 @@ class ProfileCRUD extends ProfileController
         $this->extend('updateItemForm', $form);
 
         return $form;
+    }
+
+    public function FormObjectLink($name)
+    {
+        return Controller::join_links($this->Link(), $this->modelClass, $name);
     }
 
     public function doEdit(array $data, Form $form)
