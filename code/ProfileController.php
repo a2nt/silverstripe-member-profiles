@@ -24,9 +24,9 @@ class ProfileController extends Controller
     private static $requirements_css = [];
     private static $requirements_javascript = [];
 
-    protected $member = null;
-    protected $response_controller = null;
-    protected $profile_classes = null;
+    protected $member;
+    protected $response_controller;
+    protected $profile_classes;
 
     public function init()
     {
@@ -188,9 +188,9 @@ class ProfileController extends Controller
      */
     public function handleController(SS_HTTPRequest $request)
     {
-        $controller = $request->param('ProfileController');
-        if ($this->hasProfileController($controller)) {
-            $controller = Injector::inst()->create($controller, DataModel::inst());
+        $controller_class = $request->param('ProfileController');
+        if ($this->hasProfileController($controller_class)) {
+            $controller = Injector::inst()->create($controller_class, DataModel::inst());
 
             // remove first 2 pieces of URL and process request
             $request->setURL(implode('/', array_slice(explode('/', $request->getURL()), 2)));
@@ -198,7 +198,7 @@ class ProfileController extends Controller
             return $controller->handleRequest($request, DataModel::inst());
         }
 
-        $action = $controller;
+        $action = $controller_class;
         if (!$this->hasAction($action)) {
             return $this->httpError(404, 'Action '.$action.' isn\'t available.');
         }
@@ -311,7 +311,9 @@ class ProfileController extends Controller
         $tmpPage->Title = $this->Title();
         // Disable ID-based caching  of the log-in page by making it a random number
         $tmpPage->ID = -1 * rand(1, 10000000);
+        $tmpPage->ProfileClass = $this->getProfileClass();
 
+        $controller = Page_Controller::create($tmpPage);
         $controller = Page_Controller::create($tmpPage);
         $controller->setDataModel($this->model);
         $controller->init();

@@ -36,7 +36,10 @@ class ProfileCRUD extends ProfileController
 
     public function setupVariables()
     {
-        parent::setupVariables();
+        if (!parent::setupVariables()) {
+            return false;
+        }
+
         $this->extend('setupVariables');
 
         $modelClass = $this->request->param('ModelClass');
@@ -56,18 +59,14 @@ class ProfileCRUD extends ProfileController
                 case 'view':
                 case 'edit':
                 case 'delete':
-                    $ID = $this->request->param('ID');
-                    $req = $this->request->requestVar('ModelClass');
-                    $ID = $req ? $req : $ID;
-
-                    $item = $modelClass::get()->byID($ID);
+                    $item = $this->getItem();
                     if (!$item) {
                         $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
                         return false;
                     }
-                    $this->setItem($item);
-                break;
+                    break;
             }
+
         }
 
 
@@ -76,12 +75,25 @@ class ProfileCRUD extends ProfileController
 
     public function getItem()
     {
+        if (!$this->item && $this->modelClass) {
+            $modelClass = $this->modelClass;
+            $ID = $this->request->param('ID');
+            $req = $this->request->requestVar('ID');
+            $ID = $req ? $req : $ID;
+
+            $this->item = $modelClass::get()->byID($ID);
+        }
         return $this->item;
     }
 
     public function setItem($item)
     {
         $this->item = $item;
+    }
+
+    public function ListItems($class)
+    {
+        return $class::get();
     }
 
     public function newitem()
