@@ -42,16 +42,13 @@ class ProfileCRUD extends ProfileController
 
         $this->extend('setupVariables');
 
-        $modelClass = $this->request->param('ModelClass');
-        $req = $this->request->requestVar('ModelClass');
-        $modelClass = $req ? $req : $modelClass;
+        $modelClass = $this->getModel();
 
         if ($modelClass) {
             if (!in_array($modelClass, $this->stat('managed_models'))) {
                 $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
                 return false;
             }
-            $this->modelClass = $modelClass;
 
             // allow new/$ID if you need to add object to a specific ID
             $action = $this->request->param('Action');
@@ -66,13 +63,38 @@ class ProfileCRUD extends ProfileController
                     }
                     break;
             }
-
         }
 
 
         return true;
     }
 
+    /**
+     * @return mixed|string
+     */
+    public function getModel()
+    {
+        if (!$this->modelClass) {
+            $modelClass = $this->request->param('ModelClass');
+            $req = $this->request->requestVar('ModelClass');
+            $modelClass = $req ? $req : $modelClass;
+
+            $this->modelClass = $modelClass;
+        }
+        return $this->modelClass;
+    }
+
+    /**
+     * @param string $model
+     */
+    public function setModel($model)
+    {
+        $this->modelClass = $model;
+    }
+
+    /**
+     * @return DataObject
+     */
     public function getItem()
     {
         if (!$this->item && $this->modelClass) {
@@ -86,19 +108,23 @@ class ProfileCRUD extends ProfileController
         return $this->item;
     }
 
+    /**
+     * @param DataObject $item
+     */
     public function setItem($item)
     {
         $this->item = $item;
     }
 
-    public function ListItems($class)
+    public function ListItems($class = null)
     {
+        $class = $class ? $class : $this->modelClass;
         return $class::get();
     }
 
     public function newitem()
     {
-        if (!Permission::check('CREATE_'.$this->modelClass)) {
+        if (!Permission::check('CREATE_'.$this->getModel())) {
             return Security::permissionFailure();
         }
 
@@ -107,7 +133,7 @@ class ProfileCRUD extends ProfileController
 
     public function view()
     {
-        if (!Permission::check('VIEW_'.$this->modelClass)) {
+        if (!Permission::check('VIEW_'.$this->getModel())) {
             return Security::permissionFailure();
         }
 
@@ -143,19 +169,25 @@ class ProfileCRUD extends ProfileController
 
     public function ItemForm()
     {
-        $model = $this->modelClass;
-        $item = ($this->item) ? $this->item : singleton($model);
-        $btn_content = '<i class="fa fa-plus"></i> '._t('ProfileCRUD.NEWITEM', 'Make New');
+        $model = $this->getModel();
+        $item = $this->getItem();
 
-        $fields = $item->getFrontEndFields();
-        if ($this->item) {
-            $fields->push(HiddenField::create('ID'));
-            $btn_content = '<i class="fa fa-pencil"></i> '._t('ProfileCRUD.EDITITEM', 'Save');
-            if (!$this->item->canEdit()) {
+
+        if ($item) {
+            if (!$item->canEdit()) {
                 return Security::permissionFailure();
             }
+            $btn_content = '<i class="fa fa-pencil"></i> '._t('ProfileCRUD.EDITITEM', 'Save');
+        } else {
+            $item = $item ? $item : singleton($model);
+            $btn_content = '<i class="fa fa-plus"></i> '._t('ProfileCRUD.NEWITEM', 'Make New');
         }
 
+        $fields = $item->getFrontEndFields();
+
+        if ($item->ID) {
+            $fields->push(HiddenField::create('ID'));
+        }
         $fields->push(HiddenField::create('ModelClass', '', $model));
 
         $form = Form::create(
@@ -179,7 +211,7 @@ class ProfileCRUD extends ProfileController
             ->loadDataFrom($item);
 
 
-        if ($this->item) {
+        if ($item) {
             $actions->push(FormAction::create(
                 'doDelete',
                 _t('Profile_Controller.DELETEITEM', 'Delete')
@@ -219,33 +251,28 @@ class ProfileCRUD extends ProfileController
 
     public function FormObjectLink($name)
     {
-        return Controller::join_links($this->Link(), $this->modelClass, $name);
+        return Controller::join_links($this->Link(), $this->getModel(), $name);
     }
 
     public function doEdit(array $data, Form $form)
     {
-        $new = false;
-        $ID = isset($data['ID']) ? $data['ID'] : null;
-        $modelClass = $this->modelClass;
+        $modelClass = $this->getModel();
+        $item = $this->getItem();
 
         if (!Permission::check('CREATE_'.$modelClass)) {
             return Security::permissionFailure();
         }
 
-        if ($ID) {
-            if (!$item = $modelClass::get()->byID($ID)) {
-                return $this->httpError(404);
+        if ($item) {
+            if (!$item->canEdit()) {
+                $this->extend('updateItemEditDenied', $item);
+
+                return $this->redirect($this->Link());
             }
-            $new = true;
         } else {
             $item = singleton($modelClass);
         }
 
-        if (!$item->canEdit()) {
-            $this->extend('updateItemEditDenied', $item);
-
-            return $this->redirect($this->Link());
-        }
 
         $form->saveInto($item);
         if (method_exists($item, 'preprocessData')) {
@@ -254,13 +281,14 @@ class ProfileCRUD extends ProfileController
 
         $validator = $item->validate();
         if ($validator->valid()) {
+            $new = $item->ID ? true : false;
             $item->write();
-
             $this->extend('updateItemEditSuccess', $item, $data, $new);
 
             return $this->redirect($item->getViewLink());
         } else {
-            Page_Controller::setSiteMessage(nl2br($validator->starredList()), 'danger');
+            $form->setMessage(nl2br($validator->starredList()), 'bad', false);
+            $this->extend('updateItemEditError', $validator);
 
             return $this->redirectBack();
         }
