@@ -70,13 +70,30 @@ class ProfileController extends Controller
     public function Link($params = null)
     {
         $class = get_class($this);
-        $action = ($class === 'ProfileController') ? '' : $class;
+        $action = ($class === get_class($this)) ? '' : $class;
 
         return self::join_links(
-            ProfileController::config()->url_segment,
             $action,
             $params
         );
+    }
+
+    public static function join_links()
+    {
+        $class = get_called_class();
+        $url_segment = '';
+
+        if ($class !== 'ProfileController') {
+            $url_segment = self::config()->get('url_segment', Config::UNINHERITED);
+            $url_segment = $url_segment ? $url_segment : $class;
+        }
+
+        $args = array_merge([
+            ProfileController::config()->get('url_segment', Config::UNINHERITED),
+            $url_segment
+        ], func_get_args());
+
+        return parent::join_links(...$args);
     }
 
     public function Title($class = null)
@@ -189,7 +206,11 @@ class ProfileController extends Controller
     public function handleController(SS_HTTPRequest $request)
     {
         $controller_class = $request->param('ProfileController');
-        if ($this->hasProfileController($controller_class)) {
+
+        if (
+            get_class($this) !== $controller_class
+            && $this->hasProfileController($controller_class)
+        ) {
             $controller = Injector::inst()->create($controller_class, DataModel::inst());
 
             // remove first 2 pieces of URL and process request
@@ -219,15 +240,17 @@ class ProfileController extends Controller
      *
      * @return boolean
      */
-    public function setupVariables(){
+    public function setupVariables()
+    {
         return true;
     }
 
-    protected function handleAction($request, $action) {
-        if($this->setupVariables()) {
+    protected function handleAction($request, $action)
+    {
+        if ($this->setupVariables()) {
             return parent::handleAction($request, $action);
         }
-        return $this->httpError(404,'Not available.');
+        return $this->httpError(404, 'Not available.');
     }
 
     /**
@@ -288,7 +311,10 @@ class ProfileController extends Controller
     protected function hasProfileController($controller)
     {
         $classes = $this->get_profile_classes();
-        if (is_array($classes)) {
+        if (
+            is_array($classes)
+            && is_subclass_of($controller,get_class($this))
+        ) {
             return in_array($controller, $classes);
         }
 
@@ -366,7 +392,8 @@ class ProfileController extends Controller
      * @param string $errorMessage Plaintext error message
      * @uses SS_HTTPResponse_Exception
      */
-    public function httpError($errorCode, $errorMessage = null) {
+    public function httpError($errorCode, $errorMessage = null)
+    {
         $response = ErrorPage::response_for($errorCode);
         return parent::httpError($errorCode, $response ? $response : $errorMessage);
     }
