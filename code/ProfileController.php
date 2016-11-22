@@ -89,6 +89,7 @@ class ProfileController extends Controller
         }
 
         $args = array_merge([
+            '/',
             ProfileController::config()->get('url_segment', Config::UNINHERITED),
             $url_segment
         ], func_get_args());
