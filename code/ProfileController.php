@@ -158,6 +158,7 @@ class ProfileController extends Controller
 
         $menu = ArrayList::create([]);
         $menu->push(ArrayData::create([
+            'ClassName' => 'ProfileController',
             'Link' => $profile_controller->Link(),
             'Icon' => $profile_controller->Icon(),
             'Title' => $profile_controller->Title('ProfileController'),
@@ -169,6 +170,7 @@ class ProfileController extends Controller
             foreach ($classes as $class) {
                 if ($class::canView()) {
                     $menu->push(ArrayData::create([
+                        'ClassName' => $class,
                         'Link' => $profile_controller->Link($class),
                         'Icon' => $profile_controller->Icon($class),
                         'Title' => $profile_controller->Title($class),

@@ -11,7 +11,7 @@
 	<div id="ProfileMenuCollapse" class="collapse navbar-collapse">
 		<ul class="nav navbar-nav">
 			<% loop $ProfileMenu %>
-				<li class="$Status">
+				<li class="$ClassName $Status">
 					<a href="$Link" rel="nofollow">
                         $Icon
 						$Title
