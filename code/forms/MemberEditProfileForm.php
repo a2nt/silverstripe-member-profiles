@@ -38,9 +38,6 @@ class MemberEditProfileForm extends Form
             $fields->push($passwordfield);
         }
 
-        $this->extend('updateMemberEditProfileForm');
-
-        // use it if you need to add specific member fields for different types of members for an instance
         $this->member->extend('updateMemberEditProfileForm', $this);
 
         $this->loadDataFrom($this->member);
@@ -104,12 +101,10 @@ class MemberEditProfileForm extends Form
 
         return LiteralField::create(
             'ChangePasswordLink',
-            '<div class="field"><p>
-                    <a href="Security/changepassword?BackURL='.$this->controller->Link().'">'
-                        ._t('MemberEditProfileForm.CHANGEPASSWORD', 'Сhange password')
-                    .'</a>
-                </p>
-            </div>'
+            '<div class="field"><p>'
+            .'<a href="Security/changepassword?BackURL='.$this->controller->Link().'">'
+            ._t('MemberEditProfileForm.CHANGEPASSWORD', 'Сhange password')
+            .'</a></p></div>'
         );
     }
 }

@@ -14,10 +14,11 @@ class ProfileMembership extends ProfileController
 
     private static $allowed_actions = [
         'index' => true,
-        'edit' => true,
         'MemberEditProfileForm' => '->canEditProfile',
-        'updatedetails' => '->canEditProfile',
-        'sendpassword' => '->canEditProfile',
+    ];
+
+    private static $url_handlers = [
+        'MemberEditProfileForm' => 'MemberEditProfileForm',
     ];
 
     private static $action_template = 'ProfileMembership';
