@@ -163,8 +163,6 @@ class ProfileCRUD extends ProfileController
 
             return $this->redirect($this->Link());
         }
-
-        //return $this->httpError(404);
     }
 
     public function ItemForm()
@@ -185,7 +183,7 @@ class ProfileCRUD extends ProfileController
 
         $fields = $item->getFrontEndFields();
 
-        if ($item->ID) {
+        if ($item->isInDB()) {
             $fields->push(HiddenField::create('ID'));
         }
         $fields->push(HiddenField::create('ModelClass', '', $model));
@@ -211,7 +209,7 @@ class ProfileCRUD extends ProfileController
             ->loadDataFrom($item);
 
 
-        if ($item) {
+        if ($item->isInDB()) {
             $actions->push(FormAction::create(
                 'doDelete',
                 _t('Profile_Controller.DELETEITEM', 'Delete')
