@@ -4,7 +4,9 @@
  * Basic Profile Area Controller
  *
  */
-class ProfileController extends Controller
+class ProfileController
+    extends Controller
+    implements PermissionProvider
 {
     private static $menu_icon = '<i class="fa fa-user"></i>';
     private static $menu_title = 'Profile';
@@ -50,9 +52,19 @@ class ProfileController extends Controller
         $this->extend('init');
     }
 
+    public function providePermissions()
+    {
+        $class = get_class($this);
+        if(!$this->stat('hide_ancestor')) {
+            return [
+                'VIEW_' . $class => $this->Title()
+            ];
+        }
+    }
+
     public static function canView()
     {
-        return true;
+        return Permission::check('VIEW_'.get_called_class());
     }
 
     public function getMember()

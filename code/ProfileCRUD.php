@@ -4,7 +4,8 @@
  *
  */
 
-class ProfileCRUD extends ProfileController
+class ProfileCRUD
+    extends ProfileController
 {
     private static $hide_ancestor = true;
 
@@ -122,9 +123,28 @@ class ProfileCRUD extends ProfileController
         return $class::get();
     }
 
+    public function providePermissions()
+    {
+        $permissions = parent::providePermissions();
+        $class = get_class($this);
+        $models = $this->config()->get('managed_models', Config::UNINHERITED);
+
+        foreach ($models as $model) {
+            $permissions['CREATE_'.$model] = 'Create '.$model;
+        }
+
+        return $permissions;
+    }
+
+    public function canCreate($class = null)
+    {
+        $class = $class ? $class : $this->getModel();
+        return Permission::check('CREATE_'.$class);
+    }
+
     public function newitem()
     {
-        if (!Permission::check('CREATE_'.$this->getModel())) {
+        if (!$this->canCreate()) {
             return Security::permissionFailure();
         }
 
@@ -133,10 +153,6 @@ class ProfileCRUD extends ProfileController
 
     public function view()
     {
-        if (!Permission::check('VIEW_'.$this->getModel())) {
-            return Security::permissionFailure();
-        }
-
         return $this->render();
     }
 
@@ -209,7 +225,7 @@ class ProfileCRUD extends ProfileController
             ->loadDataFrom($item);
 
 
-        if ($item->isInDB()) {
+        if ($item->ID) {
             $actions->push(FormAction::create(
                 'doDelete',
                 _t('Profile_Controller.DELETEITEM', 'Delete')
