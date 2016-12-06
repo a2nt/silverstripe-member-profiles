@@ -81,6 +81,7 @@ class MemberRegistrationPage extends Page
 class MemberRegistrationPage_Controller extends Page_Controller
 {
     private static $allowed_actions = [
+        'LoginForm',
         'Form',
     ];
     private static $url_segment = 'register';
@@ -104,5 +105,13 @@ class MemberRegistrationPage_Controller extends Page_Controller
     public function Form()
     {
         return MemberRegistrationForm::create($this, 'Form');
+    }
+
+    public function LoginForm(){
+        $form = parent::LoginForm();
+
+        $this->extend('updateLoginForm',$form);
+
+        return $form;
     }
 }
