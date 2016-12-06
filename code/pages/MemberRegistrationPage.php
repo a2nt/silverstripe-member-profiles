@@ -107,10 +107,11 @@ class MemberRegistrationPage_Controller extends Page_Controller
         return MemberRegistrationForm::create($this, 'Form');
     }
 
-    public function LoginForm(){
+    public function LoginForm()
+    {
         $form = parent::LoginForm();
 
-        $this->extend('updateLoginForm',$form);
+        $this->extend('updateLoginForm', $form);
 
         return $form;
     }
