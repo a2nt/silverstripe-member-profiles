@@ -49,6 +49,8 @@ class MemberEditProfileForm extends Form
         if (Member::config()->send_frontend_update_notifications) {
             $this->sendUpdateNotification($data);
         }
+        $this->member->extend('updateMemberEditProfileFormSubmit', $data, $form);
+
         $this->member->write();
         $form->sessionMessage(_t('MemberEditProfileForm.UPDATED', 'Your member details have been updated.'), 'good');
 

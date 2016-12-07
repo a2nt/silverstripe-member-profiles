@@ -55,7 +55,7 @@ class ProfileController
     public function providePermissions()
     {
         $class = get_class($this);
-        if(!$this->stat('hide_ancestor')) {
+        if (!$this->stat('hide_ancestor')) {
             return [
                 'VIEW_' . $class => $this->Title()
             ];
@@ -328,7 +328,7 @@ class ProfileController
         $classes = $this->get_profile_classes();
         if (
             is_array($classes)
-            && is_subclass_of($controller,get_class($this))
+            && is_subclass_of($controller, get_class($this))
         ) {
             return in_array($controller, $classes);
         }
