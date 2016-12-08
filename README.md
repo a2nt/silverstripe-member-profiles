@@ -1,20 +1,31 @@
 # SilverStripe Profile Area Module
 
+## Maintainer Contact
+ * Anton Fedianin
+   <tony (at) twma (dot) pro>
+   <https://twma.pro>
+
+## Requirements
+ * SilverStripe 3.2
+
+
+## Overview
+
 A simplified light-weight alternative for frontend member profile areas.
 
  * Registration page
  * Profile page for updating details.
  * Extendable profile area
 
-## Registration Page
+### Registration Page
 
 Create member Registration Page at the CMS or run /dev/build?flush after module instalation
 
-## Member Profile Page
+### Member Profile Page
 
 Create member Profile Page at the CMS or run /dev/build?flush after module instalation
 
-## Profile Area
+### Profile Area
 
 By default profile area has only profile information and profile editing form controller to add extra profile areas use this example:
 
@@ -193,5 +204,7 @@ class BootstrapItemEditForm extends Extension
     }
 }
 ```
+
 [My personal website](https://twma.pro)
+
 [Buy me a Beer](https://www.paypal.me/tonytwma)
