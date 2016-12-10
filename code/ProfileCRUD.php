@@ -35,6 +35,11 @@ class ProfileCRUD
      */
     protected $modelClass;
 
+    /**
+     * @var String
+     */
+    protected $actionParam;
+
     // Init
     public function setupVariables()
     {
@@ -53,7 +58,7 @@ class ProfileCRUD
             }
 
             // allow new/$ID if you need to add object to a specific ID
-            $action = $this->request->param('Action');
+            $action = $this->getActionParam();
             switch ($action) {
                 case 'view':
                 case 'edit':
@@ -74,6 +79,18 @@ class ProfileCRUD
     /*
      * Getters and Setters
      */
+
+    /**
+     * Lower case action name to do switch-case on action
+     * @return mixed|string
+     */
+    public function getActionParam()
+    {
+        if (!$this->actionParam) {
+            $this->actionParam = strtolower($this->request->param('Action'));
+        }
+        return $this->actionParam;
+    }
 
     /**
      * @return mixed|string
@@ -109,7 +126,9 @@ class ProfileCRUD
             $req = $this->request->requestVar('ID');
             $ID = $req ? $req : $ID;
 
-            $this->item = $modelClass::get()->byID($ID);
+            if($this->getActionParam() !== 'newitem') {
+                $this->item = $modelClass::get()->byID($ID);
+            }
         }
         return $this->item;
     }
