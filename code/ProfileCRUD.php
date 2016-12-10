@@ -13,7 +13,7 @@ class ProfileCRUD
     ];
 
     private static $allowed_actions = [
-        'newitem',
+        'newItem',
         'view',
         'edit',
         'delete',
@@ -35,6 +35,7 @@ class ProfileCRUD
      */
     protected $modelClass;
 
+    // Init
     public function setupVariables()
     {
         if (!parent::setupVariables()) {
@@ -69,6 +70,10 @@ class ProfileCRUD
 
         return true;
     }
+
+    /*
+     * Getters and Setters
+     */
 
     /**
      * @return mixed|string
@@ -123,12 +128,14 @@ class ProfileCRUD
         return $class::get();
     }
 
+    /*
+     * Permission checks
+     */
     public function providePermissions()
     {
         $permissions = parent::providePermissions();
-        $class = get_class($this);
-        $models = $this->config()->get('managed_models', Config::UNINHERITED);
 
+        $models = self::config()->get('managed_models', Config::UNINHERITED);
         foreach ($models as $model) {
             $permissions['CREATE_'.$model] = 'Create '.$model;
         }
@@ -136,49 +143,18 @@ class ProfileCRUD
         return $permissions;
     }
 
-    public function canCreate($class = null)
+    public static function canCreate($class)
     {
-        $class = $class ? $class : $this->getModel();
         return Permission::check('CREATE_'.$class);
     }
 
-    public function newitem()
+    public function newItem()
     {
-        if (!$this->canCreate()) {
+        if (!self::canCreate($this->getModel())) {
             return Security::permissionFailure();
         }
 
         return $this->render();
-    }
-
-    public function view()
-    {
-        return $this->render();
-    }
-
-    public function edit()
-    {
-        if (!$this->getItem()->canEdit()) {
-            return Security::permissionFailure();
-        }
-
-        return $this->render();
-    }
-
-    public function delete()
-    {
-        $item = $this->getItem();
-        if ($item->canEdit()) {
-            $item->delete();
-
-            $this->extend('updateItemRemoved', $item);
-
-            return $this->redirect($this->Link());
-        } else {
-            $this->extend('updateItemRemoveDenied', $item);
-
-            return $this->redirect($this->Link());
-        }
     }
 
     public function ItemForm()
@@ -220,7 +196,7 @@ class ProfileCRUD
                     ->addExtraClass('btn '.Page_Controller::getBtnClass())
                     ->setButtonContent($btn_content)
             ),
-            RequiredFields::create($item->config()->required_fields)
+            RequiredFields::create($item::config()->required_fields)
         )
             ->loadDataFrom($item);
 
@@ -266,6 +242,40 @@ class ProfileCRUD
     public function FormObjectLink($name)
     {
         return Controller::join_links($this->Link(), $this->getModel(), $name);
+    }
+
+    /*
+     * Actions
+     */
+
+    public function view()
+    {
+        return $this->render();
+    }
+
+    public function edit()
+    {
+        if (!$this->getItem()->canEdit()) {
+            return Security::permissionFailure();
+        }
+
+        return $this->render();
+    }
+
+    public function delete()
+    {
+        $item = $this->getItem();
+        if ($item->canEdit()) {
+            $item->delete();
+
+            $this->extend('updateItemRemoved', $item);
+
+            return $this->redirect($this->Link());
+        } else {
+            $this->extend('updateItemRemoveDenied', $item);
+
+            return $this->redirect($this->Link());
+        }
     }
 
     public function doEdit(array $data, Form $form)

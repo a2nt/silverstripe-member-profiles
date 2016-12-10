@@ -55,9 +55,9 @@ class ProfileController
     public function providePermissions()
     {
         $class = get_class($this);
-        if (!$this->stat('hide_ancestor')) {
+        if (!self::config()->get('hide_ancestor', Config::UNINHERITED)) {
             return [
-                'VIEW_' . $class => $this->Title()
+                'VIEW_' . $class => 'Access to '.$this->Title()
             ];
         }
     }
