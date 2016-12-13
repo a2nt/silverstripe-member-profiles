@@ -205,6 +205,6 @@ class BootstrapItemEditForm extends Extension
 }
 ```
 
-[My personal website](https://twma.pro)
+[My personal website](https://tony.twma.pro)
 
 [Buy me a Beer](https://www.paypal.me/tonytwma)
