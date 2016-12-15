@@ -126,7 +126,7 @@ class ProfileCRUD
             $req = $this->request->requestVar('ID');
             $ID = $req ? $req : $ID;
 
-            if($this->getActionParam() !== 'newitem') {
+            if ($this->getActionParam() !== 'newitem') {
                 $this->item = $modelClass::get()->byID($ID);
             }
         }
@@ -145,6 +145,11 @@ class ProfileCRUD
     {
         $class = $class ? $class : $this->modelClass;
         return $class::get();
+    }
+
+    public function getNewItemLink($class, $params = null)
+    {
+        return self::join_links($class, 'newItem', $params);
     }
 
     /*
