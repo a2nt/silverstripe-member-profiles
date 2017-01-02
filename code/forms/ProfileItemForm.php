@@ -84,6 +84,11 @@ class ProfileItemForm extends Form
             }
         }
 
+        // let's u create rewrite fields values
+        if (method_exists($item, 'customDataFields')) {
+            $item->customDataFields($this);
+        }
+
         $this->extend('updateForm');
 
         return $this;
