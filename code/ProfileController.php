@@ -167,6 +167,7 @@ class ProfileController
         $curr = get_class(Controller::curr());
         $classes = $this->get_profile_classes();
         $profile_controller = singleton('ProfileController');
+        $config = Config::inst();
 
         $menu = ArrayList::create([]);
         $menu->push(ArrayData::create([
@@ -180,7 +181,7 @@ class ProfileController
         // if child classes exists make links
         if (is_array($classes)) {
             foreach ($classes as $class) {
-                if ($class::canView()) {
+                if ($class::canView() && !$config->get($class, 'hide_menu', Config::UNINHERITED)) {
                     $menu->push(ArrayData::create([
                         'ClassName' => $class,
                         'Link' => $profile_controller->Link($class),

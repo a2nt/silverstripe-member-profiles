@@ -11,9 +11,9 @@ class ProfileItemForm extends Form
     public function __construct(Controller $controller, $name, $model = null, $item = null)
     {
         $model = $model ? $model : $controller->getModel();
-        $item = $item === null ? $item : $controller->getItem();
+        $item = $item ? $item : $controller->getItem();
 
-        if ($item) {
+        if ($item && $item->getField('ID')) {
             if (!$item->canEdit()) {
                 return Security::permissionFailure();
             }

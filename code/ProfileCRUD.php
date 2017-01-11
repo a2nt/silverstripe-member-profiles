@@ -147,7 +147,7 @@ class ProfileCRUD
         return $class::get();
     }
 
-    public function getNewItemLink($class, $params = null)
+    public static function getNewItemLink($class, $params = null)
     {
         return self::join_links($class, 'newItem', $params);
     }
