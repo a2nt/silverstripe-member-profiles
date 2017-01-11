@@ -355,7 +355,6 @@ class ProfileController
         $tmpPage->ProfileClass = $this->getProfileClass();
 
         $controller = Page_Controller::create($tmpPage);
-        $controller = Page_Controller::create($tmpPage);
         $controller->setDataModel($this->model);
         $controller->init();
         $this->response_controller = $controller;
@@ -370,6 +369,19 @@ class ProfileController
         // if the controller calls Director::redirect(), this will break early
         if (($response = $controller->getResponse()) && $response->isFinished()) {
             return $response;
+        }
+
+        if (Director::is_ajax()) {
+            $response = $controller->getResponse();
+
+            Requirements::include_in_response($response);
+
+            $response->addHeader('X-Title', $this->Title());
+            $response->addHeader('X-Link', $this->Link());
+
+            $response->setBody($this->ProfileArea());
+            $response->output();
+            die();
         }
 
         return $controller
@@ -390,6 +402,19 @@ class ProfileController
     public function render($params = null)
     {
         $controller = $this->getResponseController();
+
+        if (Director::is_ajax()) {
+            $response = $controller->getResponse();
+
+            Requirements::include_in_response($response);
+
+            $response->addHeader('X-Title', $this->Title());
+            $response->addHeader('X-Link', $this->Link($this->getRequest()->getURL()));
+
+            $response->setBody($this->ProfileArea());
+            $response->output();
+            die();
+        }
 
         return $controller
             ->customise($this)

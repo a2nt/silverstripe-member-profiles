@@ -8,10 +8,10 @@
 
 class ProfileItemForm extends Form
 {
-    public function __construct(Controller $controller, $name)
+    public function __construct(Controller $controller, $name, $model = null, $item = null)
     {
-        $model = $controller->getModel();
-        $item = $controller->getItem();
+        $model = $model ? $model : $controller->getModel();
+        $item = $item === null ? $item : $controller->getItem();
 
         if ($item) {
             if (!$item->canEdit()) {
@@ -50,6 +50,7 @@ class ProfileItemForm extends Form
         );
 
         $this->loadDataFrom($item);
+        $this->addExtraClass('item-'.$model);
 
         if ($item->getField('ID')) {
             $actions->push(FormAction::create(
@@ -115,13 +116,14 @@ class ProfileItemForm extends Form
 
 
         $this->saveInto($item);
+
         if (method_exists($item, 'preprocessData')) {
             $item->preprocessData($data, $this);
         }
 
         $validator = $item->validate();
         if ($validator->valid()) {
-            $new = $item->getField('ID') ? true : false;
+            $new = $item->getField('ID') ? false : true;
             $item->write();
             $this->extend('updateItemEditSuccess', $item, $data, $new);
 

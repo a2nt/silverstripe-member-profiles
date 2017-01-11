@@ -127,14 +127,14 @@ class ProfileCRUD
             $ID = $req ? $req : $ID;
 
             if ($this->getActionParam() !== 'newitem') {
-                $this->item = $modelClass::get()->byID($ID);
+                $this->setItem($modelClass::get()->byID($ID));
             }
         }
         return $this->item;
     }
 
     /**
-     * @param DataObject $item
+     * @param DataObject|null $item
      */
     public function setItem($item)
     {
@@ -183,7 +183,7 @@ class ProfileCRUD
 
     public function ItemForm()
     {
-        return ProfileItemForm::create($this,'ItemForm');
+        return ProfileItemForm::create($this, 'ItemForm');
     }
 
     public function FormObjectLink($name)
