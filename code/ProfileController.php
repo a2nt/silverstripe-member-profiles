@@ -28,7 +28,7 @@ class ProfileController
 
     protected $member;
     protected $response_controller;
-    protected $profile_classes;
+    protected static $profile_classes;
 
     public function init()
     {
@@ -162,10 +162,10 @@ class ProfileController
      *
      * @return ArrayList
      */
-    public function ProfileMenu()
+    public static function ProfileMenu()
     {
         $curr = get_class(Controller::curr());
-        $classes = $this->get_profile_classes();
+        $classes = self::get_profile_classes();
         $profile_controller = singleton('ProfileController');
         $config = Config::inst();
 
@@ -230,7 +230,7 @@ class ProfileController
             $controller = Injector::inst()->create($controller_class, DataModel::inst());
 
             // remove first 2 pieces of URL and process request
-            $request->setURL(implode('/', array_slice(explode('/', $request->getURL()), 2)));
+            $request->setUrl(implode('/', array_slice(explode('/', $request->getURL()), 2)));
 
             return $controller->handleRequest($request, DataModel::inst());
         }
@@ -274,10 +274,10 @@ class ProfileController
      *
      * @return array
      */
-    private function get_profile_classes()
+    private static function get_profile_classes()
     {
-        if ($this->profile_classes) {
-            return $this->profile_classes;
+        if (self::$profile_classes) {
+            return self::$profile_classes;
         }
 
         $classes = ClassInfo::subclassesFor('ProfileController');
@@ -312,9 +312,9 @@ class ProfileController
             }
         }
 
-        $this->profile_classes = $classes;
+        self::$profile_classes = $classes;
 
-        return $this->profile_classes;
+        return self::$profile_classes;
     }
 
     /**
@@ -326,7 +326,7 @@ class ProfileController
      */
     protected function hasProfileController($controller)
     {
-        $classes = $this->get_profile_classes();
+        $classes = self::get_profile_classes();
         if (
             is_array($classes)
             && is_subclass_of($controller, get_class($this))
