@@ -15,7 +15,7 @@
 </div>
 <% end_if %>
 
-<div id="ProfileArea" class="$ProfileClass">
+<div id="ProfileArea">
     <%-- It's $Layout like area, but for profile sub-areas --%>
     $ProfileArea
 </div>
