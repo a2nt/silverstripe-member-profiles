@@ -8,28 +8,32 @@
 
 class ProfileItemForm extends Form
 {
+    private $item;
+    private $itemClass;
+
     public function __construct(Controller $controller, $name, $model = null, $item = null)
     {
-        $model = $model ? $model : $controller->getModel();
-        $item = $item ? $item : $controller->getItem();
+        $this->itemClass = $model ? $model : $controller->getModel();
+        $this->item = $item ? $item : $controller->getItem();
 
-        if ($item && $item->getField('ID')) {
-            if (!$item->canEdit()) {
+        if ($this->item && $this->item->getField('ID')) {
+            if (!$this->item->canEdit()) {
                 return Security::permissionFailure();
             }
             $btn_content = '<i class="fa fa-pencil"></i> '._t('ProfileCRUD.EDITITEM', 'Save');
         } else {
-            $item = $item ? $item : singleton($model);
+            $this->item = $this->item ? $this->item : singleton($this->itemClass);
             $btn_content = '<i class="fa fa-plus"></i> '._t('ProfileCRUD.NEWITEM', 'Make New');
         }
 
-        $fields = $item->getFrontEndFields();
+        $fields = $this->item->getFrontEndFields();
 
-        if ($item->isInDB()) {
+        if ($this->item->isInDB()) {
             $fields->push(HiddenField::create('ID'));
         }
-        $fields->push(HiddenField::create('ModelClass', '', $model));
+        $fields->push(HiddenField::create('ModelClass', '', $this->itemClass));
 
+        $model = $this->itemClass;
         parent::__construct(
             $controller,
             $name,
@@ -46,13 +50,13 @@ class ProfileItemForm extends Form
                     ->addExtraClass('btn '.Page_Controller::getBtnClass())
                     ->setButtonContent($btn_content)
             ),
-            RequiredFields::create($item::config()->get('required_fields'))
+            RequiredFields::create($model::config()->get('required_fields'))
         );
 
-        $this->loadDataFrom($item);
-        $this->addExtraClass('item-'.$model);
+        $this->loadDataFrom($this->item);
+        $this->addExtraClass('item-'.$this->itemClass);
 
-        if ($item->getField('ID')) {
+        if ($this->item->getField('ID')) {
             $actions->push(FormAction::create(
                 'doDelete',
                 _t('Profile_Controller.DELETEITEM', 'Delete')
@@ -86,8 +90,8 @@ class ProfileItemForm extends Form
         }
 
         // let's u create rewrite fields values
-        if (method_exists($item, 'customDataFields')) {
-            $item->customDataFields($this);
+        if (method_exists($this->item, 'customDataFields')) {
+            $this->item->customDataFields($this);
         }
 
         $this->extend('updateForm');
@@ -97,37 +101,35 @@ class ProfileItemForm extends Form
 
     public function doEdit(array $data)
     {
-        $modelClass = $this->getController()->getModel();
-        $item = $this->getController()->getItem();
 
-        if (!Permission::check('CREATE_'.$modelClass)) {
+        if (!Permission::check('CREATE_'.$this->itemClass)) {
             return Security::permissionFailure();
         }
 
-        if ($item) {
-            if (!$item->canEdit()) {
-                $this->extend('updateItemEditDenied', $item);
+        if ($this->item) {
+            if (!$this->item->canEdit()) {
+                $this->extend('updateItemEditDenied', $this->item);
 
                 return $this->getController()->redirect($this->getController()->Link());
             }
         } else {
-            $item = singleton($modelClass);
+            $this->item = singleton($this->itemClass);
         }
 
 
-        $this->saveInto($item);
+        $this->saveInto($this->item);
 
-        if (method_exists($item, 'preprocessData')) {
-            $item->preprocessData($data, $this);
+        if (method_exists($this->item, 'preprocessData')) {
+            $this->item->preprocessData($data, $this);
         }
 
-        $validator = $item->validate();
+        $validator = $this->item->validate();
         if ($validator->valid()) {
-            $new = $item->getField('ID') ? false : true;
-            $item->write();
-            $this->extend('updateItemEditSuccess', $item, $data, $new);
+            $new = $this->item->getField('ID') ? false : true;
+            $this->item->write();
+            $this->extend('updateItemEditSuccess', $this->item, $data, $new);
 
-            return $this->getController()->redirect($item->getViewLink());
+            return $this->getController()->redirect($this->item->getViewLink());
         } else {
             $this->setMessage(nl2br($validator->starredList()), 'bad', false);
             $this->extend('updateItemEditError', $validator);
@@ -138,11 +140,10 @@ class ProfileItemForm extends Form
 
     public function doDelete()
     {
-        $item = $this->getController()->getItem();
-        if ($item->getField('ID') && $item->canEdit()) {
-            $item->delete();
+        if ($this->item->getField('ID') && $this->item->canEdit()) {
+            $this->item->delete();
 
-            $this->extend('updateItemRemoved', $item);
+            $this->extend('updateItemRemoved', $this->item);
             return $this->getController()->redirect($this->getController()->Link());
         }
 
