@@ -101,12 +101,11 @@ class ProfileItemForm extends Form
 
     public function doEdit(array $data)
     {
-
         if (!Permission::check('CREATE_'.$this->itemClass)) {
             return Security::permissionFailure();
         }
 
-        if ($this->item) {
+        if ($this->item && $this->item->getField('ID')) {
             if (!$this->item->canEdit()) {
                 $this->extend('updateItemEditDenied', $this->item);
 
