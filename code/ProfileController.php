@@ -263,10 +263,11 @@ class ProfileController
 
     protected function handleAction($request, $action)
     {
-        if ($this->setupVariables()) {
-            return parent::handleAction($request, $action);
+        if (!$this->setupVariables()) {
+            return $this->httpError(404, 'Not available.');
         }
-        return $this->httpError(404, 'Not available.');
+
+        return parent::handleAction($request, $action);
     }
 
     /**
@@ -363,6 +364,12 @@ class ProfileController
         return $this->response_controller;
     }
 
+    public function LayoutAjax()
+    {
+        $template = $this->stat('template_main');
+        return $this->renderWith($template);
+    }
+
     public function index()
     {
         $controller = $this->getResponseController();
@@ -372,17 +379,37 @@ class ProfileController
             return $response;
         }
 
-        if (Director::is_ajax()) {
-            $response = $controller->getResponse();
+        if ($this->hasExtension('AjaxControllerExtension') && Director::is_ajax()) {
+            //$link = $action === 'index' ? $this->Link() : $this->Link($action);
+            $getVars = $this->request->getVars();
 
-            Requirements::include_in_response($response);
+            // TODO: generate link using $this->Link() method
+            $link = $getVars['url'];
 
-            $response->addHeader('X-Title', $this->Title());
-            $response->addHeader('X-Link', $this->Link());
+            unset($getVars['url']);
+            unset($getVars['_']);
 
-            $response->setBody($this->ProfileArea());
-            $response->output();
-            die();
+            if (count($getVars)) {
+                $link .= '?';
+                foreach ($getVars as $k => $v) {
+                    $link .= substr($link, -1) !== '?' ? '&'.$k.'='.$v : $k.'='.$v;
+                }
+            }
+
+            $title = $this->Title();
+
+            $response = $this->getAjaxResponse();
+
+            $response->addHeader('X-Title', $title);
+            $response->addHeader('X-Link', $link);
+
+            $response->triggerEvent('layoutRefresh', [
+                'Title' => $title,
+                'Link' => $link,
+            ]);
+            $response->pushRegion('LayoutAjax');
+
+            return $response;
         }
 
         return $controller
@@ -404,17 +431,37 @@ class ProfileController
     {
         $controller = $this->getResponseController();
 
-        if (Director::is_ajax()) {
-            $response = $controller->getResponse();
+        if ($this->hasExtension('AjaxControllerExtension') && Director::is_ajax()) {
+            //$link = $action === 'index' ? $this->Link() : $this->Link($action);
+            $getVars = $this->request->getVars();
 
-            Requirements::include_in_response($response);
+            // TODO: generate link using $this->Link() method
+            $link = $getVars['url'];
 
-            $response->addHeader('X-Title', $this->Title());
-            $response->addHeader('X-Link', $this->Link($this->getRequest()->getURL()));
+            unset($getVars['url']);
+            unset($getVars['_']);
 
-            $response->setBody($this->ProfileArea());
-            $response->output();
-            die();
+            if (count($getVars)) {
+                $link .= '?';
+                foreach ($getVars as $k => $v) {
+                    $link .= substr($link, -1) !== '?' ? '&'.$k.'='.$v : $k.'='.$v;
+                }
+            }
+
+            $title = $this->Title();
+
+            $response = $this->getAjaxResponse();
+
+            $response->addHeader('X-Title', $title);
+            $response->addHeader('X-Link', $link);
+
+            $response->triggerEvent('layoutRefresh', [
+                'Title' => $title,
+                'Link' => $link,
+            ]);
+            $response->pushRegion('LayoutAjax');
+
+            return $response;
         }
 
         return $controller

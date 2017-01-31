@@ -12,7 +12,7 @@
 		<ul class="nav navbar-nav">
 			<% loop $ProfileMenu %>
 				<li class="$ClassName $Status">
-					<a href="$Link" rel="nofollow">
+					<a href="$Link" class="ajax $ClassName $Status" rel="nofollow">
                         $Icon
 						$Title
 					</a>
