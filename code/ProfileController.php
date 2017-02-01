@@ -92,20 +92,19 @@ class ProfileController
     public static function join_links()
     {
         $class = get_called_class();
-        $url_segment = '';
 
-        if ($class !== 'ProfileController') {
-            $url_segment = self::config()->get('url_segment', Config::UNINHERITED);
-            $url_segment = $url_segment ? $url_segment : $class;
-        }
+        $url_segment = self::config()->get('url_segment', Config::UNINHERITED);
+        $url_segment = $url_segment ? $url_segment : $class;
 
         $args = array_merge([
-            '/',
-            self::config()->get('url_segment', Config::UNINHERITED),
             $url_segment,
         ], func_get_args());
 
-        return parent::join_links(...$args);
+        $arg = implode('/', $args);
+
+        return ($class !== 'ProfileController')
+            ? ProfileController::join_links($arg)
+            : Controller::join_links($arg);
     }
 
     public function Title($class = null)
@@ -164,6 +163,10 @@ class ProfileController
      */
     public static function ProfileMenu()
     {
+        if(!Member::currentUser()){
+            return false;
+        }
+
         $curr = get_class(Controller::curr());
         $classes = self::get_profile_classes();
         $profile_controller = singleton('ProfileController');
