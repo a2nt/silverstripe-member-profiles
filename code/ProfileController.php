@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Basic Profile Area Controller
- *
+ * Basic Profile Area Controller.
  */
 class ProfileController
     extends Controller
@@ -57,7 +56,7 @@ class ProfileController
         $class = get_class($this);
         if (!self::config()->get('hide_ancestor', Config::UNINHERITED)) {
             return [
-                'VIEW_' . $class => 'Access to '.$this->Title()
+                'VIEW_'.$class => 'Access to '.$this->Title(),
             ];
         }
     }
@@ -102,8 +101,8 @@ class ProfileController
 
         $args = array_merge([
             '/',
-            ProfileController::config()->get('url_segment', Config::UNINHERITED),
-            $url_segment
+            self::config()->get('url_segment', Config::UNINHERITED),
+            $url_segment,
         ], func_get_args());
 
         return parent::join_links(...$args);
@@ -128,6 +127,7 @@ class ProfileController
     public function Icon($class = null)
     {
         $class = $class ? $class : get_class($this);
+
         return Config::inst()->get($class, 'menu_icon', Config::UNINHERITED);
     }
 
@@ -252,9 +252,9 @@ class ProfileController
      * Let's you check params and the other variables
      * for example ProfileCRUD checks managed_models and IDs being set
      * if request has ModelClass param it shall be manageable
-     * if it's edit or view request item with specified ID shall exist
+     * if it's edit or view request item with specified ID shall exist.
      *
-     * @return boolean
+     * @return bool
      */
     public function setupVariables()
     {
@@ -367,6 +367,7 @@ class ProfileController
     public function LayoutAjax()
     {
         $template = $this->stat('template_main');
+
         return $this->renderWith($template);
     }
 
@@ -425,6 +426,7 @@ class ProfileController
      * by {@link getViewer()}.
      *
      * @param array $params Key-value array for custom template variables (Optional)
+     *
      * @return string Parsed template content
      */
     public function render($params = null)
@@ -476,13 +478,15 @@ class ProfileController
      * Throws a HTTP error response encased in a {@link SS_HTTPResponse_Exception}, which is later caught in
      * {@link RequestHandler::handleAction()} and returned to the user.
      *
-     * @param int $errorCode
+     * @param int    $errorCode
      * @param string $errorMessage Plaintext error message
+     *
      * @uses SS_HTTPResponse_Exception
      */
     public function httpError($errorCode, $errorMessage = null)
     {
         $response = ErrorPage::response_for($errorCode);
+
         return parent::httpError($errorCode, $response ? $response : $errorMessage);
     }
 }
