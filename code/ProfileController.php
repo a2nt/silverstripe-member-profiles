@@ -361,6 +361,7 @@ class ProfileController
 
         $controller = Page_Controller::create($tmpPage);
         $controller->setDataModel($this->model);
+        Config::inst()->update('Member', 'log_last_visited', false);
         $controller->init();
         $this->response_controller = $controller;
 

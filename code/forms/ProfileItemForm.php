@@ -28,9 +28,15 @@ class ProfileItemForm extends Form
 
         $fields = $this->item->getFrontEndFields();
 
+        $fields->unshift(LiteralField::create(
+            'ItemFormNote',
+            '<div class="item-form-note">'._t(get_class($this->item).'.ItemFormNote').'</div>'
+        ));
+
         if ($this->item->isInDB()) {
             $fields->push(HiddenField::create('ID'));
         }
+
         $fields->push(HiddenField::create('ModelClass', '', $this->itemClass));
 
         $model = $this->itemClass;
