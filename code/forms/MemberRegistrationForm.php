@@ -41,7 +41,10 @@ class MemberRegistrationForm extends Form
         parent::__construct($controller, $name, $fields, $actions, $validator);
 
         if (class_exists('SpamProtectorManager')) {
-            $this->enableSpamProtection();
+            $this->enableSpamProtection([
+                'name' => 'Math',
+            ]);
+            $required[] = 'Math';
         }
 
         $this->extend('updateMemberRegistrationForm');
