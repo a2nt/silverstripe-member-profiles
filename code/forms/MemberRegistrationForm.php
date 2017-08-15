@@ -1,5 +1,17 @@
 <?php
 
+namespace  A2nt\MemberProfiles\Forms;
+
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\EmailField;
+use SilverStripe\Forms\ConfirmedPasswordField;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Control\Session;
+use SilverStripe\Control\Controller;
+use SilverStripe\Forms\Form;
+use MemberProfiles\Forms\MemberRegistration_Validator;
+
 /*
  * Member Registration Form
  * @author Anton Fedianin aka Tony Air <tony@twma.pro>
@@ -21,10 +33,10 @@ class MemberRegistrationForm extends Form
                 'FirstName',
                 'Surname',
             ];
-            $fields = singleton('Member')->scaffoldFormFields([
+            $fields = singleton(Member::class)->scaffoldFormFields([
                 'restrictFields' => $restrictFields,
                 'fieldClasses' => [
-                    'Email' => 'EmailField',
+                    'Email' => EmailField::class,
                 ],
             ]);
         }
@@ -84,24 +96,5 @@ class MemberRegistrationForm extends Form
         }
 
         return $this->controller->redirect($this->controller->Link());
-    }
-}
-
-class MemberRegistration_Validator extends Member_Validator
-{
-    public function php($data)
-    {
-        $valid = parent::php($data);
-
-        // Execute the validators on the extensions
-        if ($this->extension_instances) {
-            foreach ($this->extension_instances as $extension) {
-                if (method_exists($extension, 'hasMethod') && $extension->hasMethod('updatePHP')) {
-                    $valid &= $extension->updatePHP($data, $this->form);
-                }
-            }
-        }
-
-        return $valid;
     }
 }

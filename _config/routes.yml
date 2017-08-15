@@ -2,6 +2,6 @@
 Name: member-profiles
 After: framework/routes#coreroutes
 ---
-Director:
+SilverStripe\Control\Director:
   rules:
-    profile: 'ProfileController'
+    profile: A2nt\MemberProfiles\Controllers\ProfileController

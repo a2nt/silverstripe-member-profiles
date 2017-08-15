@@ -1,11 +1,24 @@
 <?php
+
+namespace  A2nt\MemberProfiles\Forms;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Security\Security;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\FormAction;
+use PageController;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Security\Permission;
+use SilverStripe\Forms\Form;
+
 /**
  * Created by PhpStorm.
  * User: tony
  * Date: 12/16/16
- * Time: 1:59 PM
+ * Time: 1:59 PM.
  */
-
 class ProfileItemForm extends Form
 {
     private $item;
@@ -53,7 +66,7 @@ class ProfileItemForm extends Form
                         'title',
                         _t('Page.SubscribeEmailSubmit', 'Submit')
                     )
-                    ->addExtraClass('btn '.Page_Controller::getBtnClass())
+                    ->addExtraClass('btn '.PageController::getBtnClass())
                     ->setButtonContent($btn_content)
             ),
             RequiredFields::create($model::config()->get('required_fields'))
@@ -75,15 +88,13 @@ class ProfileItemForm extends Form
                 ->setButtonContent(
                     '<i class="fa fa-times"></i> '
                     ._t('ProfileCRUD.DELETEITEM', 'Delete')
-                )
-            );
+                ));
         }
 
         // preset member info
         foreach ($fields as $field) {
             $val = $field->Value();
-            if (
-                $field->Name != 'Title'
+            if ($field->Name != 'Title'
                 && !is_object($val)
                 && $val === null
             ) {
@@ -121,7 +132,6 @@ class ProfileItemForm extends Form
             $this->item = singleton($this->itemClass);
         }
 
-
         $this->saveInto($this->item);
 
         if (method_exists($this->item, 'preprocessData')) {
@@ -149,6 +159,7 @@ class ProfileItemForm extends Form
             $this->item->delete();
 
             $this->extend('updateItemRemoved', $this->item);
+
             return $this->getController()->redirect($this->getController()->Link());
         }
 

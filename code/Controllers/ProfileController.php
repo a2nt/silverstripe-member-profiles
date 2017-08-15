@@ -1,12 +1,31 @@
 <?php
 
+namespace A2nt\MemberProfiles\Controllers;
+
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
+use SilverStripe\View\Requirements;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Permission;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\View\ArrayData;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\ClassInfo;
+use PageController;
+use SilverStripe\Control\Director;
+use SilverStripe\ErrorPage\ErrorPage;
+use SilverStripe\Security\PermissionProvider;
+
 /**
  * Basic Profile Area Controller.
  */
-class ProfileController
-    extends Controller
-    implements PermissionProvider
+class ProfileController extends Controller implements PermissionProvider
 {
+    use \SilverStripe\Core\Injector\Injectable;
+    use \SilverStripe\Core\Config\Configurable;
+
     private static $menu_icon = '<i class="fa fa-user"></i>';
     private static $menu_title = 'Profile';
     private static $url_segment = 'profile';
@@ -89,7 +108,7 @@ class ProfileController
         );
     }
 
-    public static function join_links()
+    public static function join_links($arg = NULL)
     {
         $class = get_called_class();
 
@@ -103,7 +122,7 @@ class ProfileController
         $arg = implode('/', $args);
 
         return ($class !== 'ProfileController')
-            ? ProfileController::join_links($arg)
+            ? self::join_links($arg)
             : Controller::join_links($arg);
     }
 
@@ -163,7 +182,7 @@ class ProfileController
      */
     public static function ProfileMenu()
     {
-        if(!Member::currentUser()){
+        if (!Member::currentUser()) {
             return false;
         }
 
@@ -222,12 +241,11 @@ class ProfileController
      *
      * @return SS_HTTPRequest
      */
-    public function handleController(SS_HTTPRequest $request)
+    public function handleController(HTTPRequest $request)
     {
         $controller_class = $request->param('ProfileController');
 
-        if (
-            get_class($this) !== $controller_class
+        if (get_class($this) !== $controller_class
             && $this->hasProfileController($controller_class)
         ) {
             $controller = Injector::inst()->create($controller_class, DataModel::inst());
@@ -331,8 +349,7 @@ class ProfileController
     protected function hasProfileController($controller)
     {
         $classes = self::get_profile_classes();
-        if (
-            is_array($classes)
+        if (is_array($classes)
             && is_subclass_of($controller, get_class($this))
         ) {
             return in_array($controller, $classes);
@@ -359,9 +376,9 @@ class ProfileController
         $tmpPage->ID = -1 * rand(1, 10000000);
         $tmpPage->ProfileClass = $this->getProfileClass();
 
-        $controller = Page_Controller::create($tmpPage);
+        $controller = PageController::create($tmpPage);
         $controller->setDataModel($this->model);
-        Config::inst()->update('Member', 'log_last_visited', false);
+        Config::inst()->update(Member::class, 'log_last_visited', false);
         $controller->init();
         $this->response_controller = $controller;
 

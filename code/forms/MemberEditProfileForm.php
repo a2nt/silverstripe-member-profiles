@@ -1,5 +1,17 @@
 <?php
 
+namespace  A2nt\MemberProfiles\Forms;
+
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\Security\Member_Validator;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\Form;
+
 /*
  * Member Profile Editor Form
  * @author Anton Fedianin aka Tony Air <tony@twma.pro>
@@ -29,7 +41,7 @@ class MemberEditProfileForm extends Form
         $validator = Member_Validator::create(
             'FirstName',
             'Surname',
-            'Email'
+            Email::class
         );
         parent::__construct($controller, $name, $fields, $actions, $validator);
 
@@ -66,7 +78,7 @@ class MemberEditProfileForm extends Form
         );
 
         $notifyOnFields = Member::config()
-            ->frontend_update_notification_fields ?: DataObject::database_fields('Member');
+            ->frontend_update_notification_fields ?: DataObject::database_fields(Member::class);
 
         $changedFields = $this->member->getChangedFields(true, 2);
         $send = false;

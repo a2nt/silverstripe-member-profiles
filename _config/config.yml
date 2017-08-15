@@ -1,3 +1,3 @@
-Member:
+SilverStripe\Security\Member:
   extensions:
-    - MemberProfileExtension
+    - A2nt\MemberProfiles\Extensions\MemberProfileExtension

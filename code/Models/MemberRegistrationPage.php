@@ -1,13 +1,16 @@
 <?php
 
+namespace A2nt\MemberProfiles\Models;
+
+use SilverStripe\ORM\DB;
+use Page;
+
 /*
  * Member Registration Page
  * @author Anton Fedianin aka Tony Air <tony@twma.pro>
  * https://tony.twma.pro/
  *
 */
-
-//namespace Members\Accounts;
 
 class MemberRegistrationPage extends Page
 {
@@ -17,7 +20,7 @@ class MemberRegistrationPage extends Page
         'ShowInSearch' => 0,
     ];
 
-    public function canCreate($member = null)
+    public function canCreate($member = null, $context = [])
     {
         if (self::get()->count() > 0) {
             return false;
@@ -26,7 +29,7 @@ class MemberRegistrationPage extends Page
         return true;
     }
 
-    public function requireDefaultRecords()
+    /*public function requireDefaultRecords()
     {
         if ($this->canCreate()) {
             $className = get_class($this);
@@ -38,7 +41,7 @@ class MemberRegistrationPage extends Page
             $page->flushCache();
             DB::alteration_message($className.' page created', 'created');
         }
-    }
+    }*/
 
     /**
      * Returns the link or the URLSegment to the account page on this site.
@@ -75,44 +78,5 @@ class MemberRegistrationPage extends Page
             return $page->first();
         }
         user_error('No Member Registration Page was found. Please create one in the CMS!', E_USER_ERROR);
-    }
-}
-
-class MemberRegistrationPage_Controller extends Page_Controller
-{
-    private static $allowed_actions = [
-        'LoginForm',
-        'Form',
-    ];
-    private static $url_segment = 'register';
-
-    public function Link($action = null)
-    {
-        return Controller::join_links(
-            Director::baseURL(), self::config()->url_segment, $action
-        );
-    }
-
-    public function init()
-    {
-        $backurl = $this->getRequest()->getVar('BackURL');
-        if ($backurl) {
-            Session::set('BackURL', $backurl);
-        }
-        parent::init();
-    }
-
-    public function Form()
-    {
-        return MemberRegistrationForm::create($this, 'Form');
-    }
-
-    public function LoginForm()
-    {
-        $form = parent::LoginForm();
-
-        $this->extend('updateLoginForm', $form);
-
-        return $form;
     }
 }

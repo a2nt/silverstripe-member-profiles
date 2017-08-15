@@ -1,5 +1,11 @@
 <?php
 
+namespace A2nt\MemberProfiles\Extensions;
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Control\Controller;
+use SilverStripe\ORM\DataExtension;
+
 /*
  * Member Profile Extension adds profile area link functionality
  * @author Anton Fedianin aka Tony Air <tony@twma.pro>

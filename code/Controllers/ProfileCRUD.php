@@ -1,12 +1,23 @@
 <?php
-/**
- * Object management forms and
- *
- */
 
-class ProfileCRUD
-    extends ProfileController
+namespace A2nt\MemberProfiles\Controllers;
+
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Permission;
+use SilverStripe\Security\Security;
+use SilverStripe\Control\Controller;
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\ORM\ArrayList;
+use A2nt\MemberProfiles\Forms\ProfileItemForm;
+
+/**
+ * Object management forms and.
+ */
+class ProfileCRUD extends ProfileController
 {
+    use \SilverStripe\Core\Injector\Injectable;
+    use \SilverStripe\Core\Config\Configurable;
+
     private static $hide_ancestor = true;
 
     private static $managed_models = [
@@ -53,7 +64,8 @@ class ProfileCRUD
 
         if ($modelClass) {
             if (!in_array($modelClass, $this->stat('managed_models'))) {
-                $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                $this->httpError(404, 'Model '.$modelClass.' isn\'t available.');
+
                 return false;
             }
 
@@ -65,13 +77,13 @@ class ProfileCRUD
                 case 'delete':
                     $item = $this->getItem();
                     if (!$item) {
-                        $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                        $this->httpError(404, 'Model '.$modelClass.' isn\'t available.');
+
                         return false;
                     }
                     break;
             }
         }
-
 
         return true;
     }
@@ -81,15 +93,22 @@ class ProfileCRUD
      */
 
     /**
-     * Lower case action name to do switch-case on action
+     * Lower case action name to do switch-case on action.
+     *
      * @return mixed|string
      */
     public function getActionParam()
     {
         if (!$this->actionParam) {
-            $this->actionParam = strtolower($this->request->param('Action'));
+            $this->actionParam = strtolower($this->getParam('Action'));
         }
+
         return $this->actionParam;
+    }
+
+    public function getParam($name)
+    {
+        return $this->request->param($name);
     }
 
     /**
@@ -104,6 +123,7 @@ class ProfileCRUD
 
             $this->modelClass = $modelClass;
         }
+
         return $this->modelClass;
     }
 
@@ -130,6 +150,7 @@ class ProfileCRUD
                 $this->setItem($modelClass::get()->byID($ID));
             }
         }
+
         return $this->item;
     }
 
@@ -144,6 +165,7 @@ class ProfileCRUD
     public function ListItems($class = null)
     {
         $class = $class ? $class : $this->modelClass;
+
         return $class::get();
     }
 
@@ -189,6 +211,40 @@ class ProfileCRUD
     public function FormObjectLink($name)
     {
         return Controller::join_links($this->Link(), $this->getModel(), $name);
+    }
+
+    public function getModelSelector($model = null)
+    {
+        $class = $model ? $model : $this->request->param('ModelClass');
+        if (!$class || !class_exists($class)) {
+            return false;
+        }
+
+        $subClasses = ClassInfo::subclassesFor($class);
+        $subClasses = array_diff($subClasses, [$class]);
+
+        $models = [];
+        foreach ($subClasses as $subClass) {
+            if (self::canCreate($subClass)) {
+                $models[] = [
+                    'Title' => _t(
+                        $subClass.'.SINGULARNAME',
+                        preg_replace(
+                            '/(?<!^)((?<![[:upper:]])[[:upper:]]|[[:upper:]](?![[:upper:]]))/',
+                            ' $1',
+                            $subClass
+                        )
+                    ),
+                    'Description' => _t($subClass.'.ClassDescription'),
+                    'ClassName' => $subClass,
+                    'NewLink' => method_exists($subClass, 'getNewLink')
+                            ? $subClass::getNewLink()
+                            : false,
+                ];
+            }
+        }
+
+        return ArrayList::create($models);
     }
 
     /*
