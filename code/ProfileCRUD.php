@@ -1,11 +1,9 @@
 <?php
-/**
- * Object management forms and
- *
- */
 
-class ProfileCRUD
-    extends ProfileController
+/**
+ * Object management forms and.
+ */
+class ProfileCRUD extends ProfileController
 {
     private static $hide_ancestor = true;
 
@@ -53,7 +51,8 @@ class ProfileCRUD
 
         if ($modelClass) {
             if (!in_array($modelClass, $this->stat('managed_models'))) {
-                $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                $this->httpError(404, 'Model '.$modelClass.' isn\'t available.');
+
                 return false;
             }
 
@@ -65,13 +64,13 @@ class ProfileCRUD
                 case 'delete':
                     $item = $this->getItem();
                     if (!$item) {
-                        $this->httpError(404, 'Model ' . $modelClass . ' isn\'t available.');
+                        $this->httpError(404, 'Model '.$modelClass.' isn\'t available.');
+
                         return false;
                     }
                     break;
             }
         }
-
 
         return true;
     }
@@ -81,7 +80,8 @@ class ProfileCRUD
      */
 
     /**
-     * Lower case action name to do switch-case on action
+     * Lower case action name to do switch-case on action.
+     *
      * @return mixed|string
      */
     public function getActionParam()
@@ -89,6 +89,7 @@ class ProfileCRUD
         if (!$this->actionParam) {
             $this->actionParam = strtolower($this->request->param('Action'));
         }
+
         return $this->actionParam;
     }
 
@@ -104,6 +105,7 @@ class ProfileCRUD
 
             $this->modelClass = $modelClass;
         }
+
         return $this->modelClass;
     }
 
@@ -130,6 +132,7 @@ class ProfileCRUD
                 $this->setItem($modelClass::get()->byID($ID));
             }
         }
+
         return $this->item;
     }
 
@@ -144,6 +147,7 @@ class ProfileCRUD
     public function ListItems($class = null)
     {
         $class = $class ? $class : $this->modelClass;
+
         return $class::get();
     }
 
@@ -212,7 +216,7 @@ class ProfileCRUD
     public function delete()
     {
         $item = $this->getItem();
-        if ($item->canEdit()) {
+        if ($item && $item->canEdit()) {
             $item->delete();
 
             $this->extend('updateItemRemoved', $item);

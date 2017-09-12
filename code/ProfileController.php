@@ -3,9 +3,7 @@
 /**
  * Basic Profile Area Controller.
  */
-class ProfileController
-    extends Controller
-    implements PermissionProvider
+class ProfileController extends Controller implements PermissionProvider
 {
     private static $menu_icon = '<i class="fa fa-user"></i>';
     private static $menu_title = 'Profile';
@@ -100,10 +98,15 @@ class ProfileController
             $url_segment,
         ], func_get_args());
 
+        // remove empty values
+        $args = array_filter($args);
+
         $arg = implode('/', $args);
 
+        $mainClass = 'ProfileController';
+
         return ($class !== 'ProfileController')
-            ? ProfileController::join_links($arg)
+            ? $mainClass::join_links($arg)
             : Controller::join_links($arg);
     }
 
@@ -163,7 +166,7 @@ class ProfileController
      */
     public static function ProfileMenu()
     {
-        if(!Member::currentUser()){
+        if (!Member::currentUser()) {
             return false;
         }
 
@@ -226,8 +229,7 @@ class ProfileController
     {
         $controller_class = $request->param('ProfileController');
 
-        if (
-            get_class($this) !== $controller_class
+        if (get_class($this) !== $controller_class
             && $this->hasProfileController($controller_class)
         ) {
             $controller = Injector::inst()->create($controller_class, DataModel::inst());
@@ -331,8 +333,7 @@ class ProfileController
     protected function hasProfileController($controller)
     {
         $classes = self::get_profile_classes();
-        if (
-            is_array($classes)
+        if (is_array($classes)
             && is_subclass_of($controller, get_class($this))
         ) {
             return in_array($controller, $classes);
@@ -492,5 +493,14 @@ class ProfileController
         $response = ErrorPage::response_for($errorCode);
 
         return parent::httpError($errorCode, $response ? $response : $errorMessage);
+    }
+
+    public function MainProfileClass()
+    {
+        return 'profile';
+    }
+    public function CurrProfileClass()
+    {
+        return get_class($this);
     }
 }
